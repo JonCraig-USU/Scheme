@@ -10,61 +10,88 @@
         ((< n m) (gcd (- m n) n))
         (else m)))
 
-;; check appendages and verify base case
+; COUNTING works by recursing back to 1 and appending all the way back
 (define (countingNumbers limit)
-  (cond (<= limit 1) (1)
-    (else (append (countingNumbers (- limit 1) limit)))
+  (if (> limit 1)
+    (append (countingNumbers (- limit 1)) (list limit))
+    (list limit)
   )
 )
 
-;; check that numbers are actually appending onto it
-;; note they are most likely not at the moment
+; EVEN recurses back to one checking the modulo of the number and 2 then appending back up
 (define (evenNumbers limit)
   (if (> limit 1) 
-    (cond (= (modulo limit 2) 0) 
-      (evenNumbers (- limit 1) limit)
-      (else (evenNumbers(- limit 1)))  
+    (if (= (mod limit 2) 0) 
+      (append (evenNumbers (- limit 1)) (list limit))
+      (evenNumbers(- limit 1))
     )
+    ()
   )
 )
 
-;; use a lambda function and recurse down to 0 appending on way back, or not
+; Prime numbers starts a count to the limit then runs a map to check for all primes
 (define (primeNumbers limit)
+  (map (isP (i) countingNumbers(limit)))
 )
 
-;; check sub list creation and usage
+(define (isP l)
+  (do ((i 2 (+ i 1)))
+    ((<= (* i i ) (sqrt l)))
+      (if (= (mod l i) 0)
+        '()
+        l
+      )
+  )
+)
+
+; MERGE verifies that there are parts remaining in the list
+; if there is check the firt values on each list and place the largest on the 'front'
+; of the current list then recurse to the next set of list using the remaining parts
 (define (merge listOne listTwo)
-  (cond (>= (car listOne) (car listTwo)) 
-    append ((list (car listOne)) (merge (cdr listOne) listTwo))
-    (else (append(car listTwo) (merge listOne (cdr listTwo)))
+  (cond
+    ((and (null? listOne) (null? listTwo))
+      '())
+    ((null? listOne)
+      listTwo)
+    ((null? listTwo)
+      listOne)
+    (>= (car listOne) (car listTwo)
+      (append (list (car listOne)) (merge (cdr listOne) listTwo)))
+    (else (append (list (car listTwo) (merge listOne (cdr listTwo)))
     )
   )
 )
 
 
+; WRAP passes the same list with the front moved to the back to the next level
+; until the desired depth is reached and returns that answer
 (define (wrap numberToWrap aList)
-  (cond (>= numberToWrap 1) 
-    (wrap (- numberToWrap 1) (append (list (cdr aList)) (list (car aList))))
-    (else (aList))
+  (if (<= numberToWrap 0)
+    aList
+    (wrap (- numberToWrap 1) (append (cdr aList) (list (car aList))))
   )
 )
 
+; SUBLISTS uses the map feature to apply countingNumbers to everything
+; in the lists creating a list of the sub lists
 (define (subLists aList)
-  (cond (null? ))
-
-  ;; list (count (cdr aList) aList)
+  (map (lambda (i) (countingNumbers i)) aList)
 )
 
-;; this willl need a few things
-;; base case is to recurse down to initial value
-;; recurse may have to go down to 0, check my other functions allow
-;; function recurse ans current val
+; REDUC works in 2 parts
+; takes the list of a lists and passes to a map to seperate and prepare for the second function
+; the 2nd functinon takes care of creating the actual functions and recursing through the sub lists
+(define (reduc f init listOne)
+  (if (<= (length listOne) 1)
+    (f init (car listOne))
+    (f (reduc f init (cdr listOne)) (car listOne))
+  )
+)
+
 (define (reduceLists func initialValue listOfLists)
+  (map (lambda (i) (reduc func initialValue i)) listOfLists)
 )
 
-(define (swap myList)
-   (if (>= (length myList) 2)
-      (append (list (cadr myList)) (list (car myList)) (cddr myList))
-      myList
-   )
-)
+
+
+
