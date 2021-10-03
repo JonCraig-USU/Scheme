@@ -31,16 +31,26 @@
 
 ; Prime numbers starts a count to the limit then runs a map to check for all primes
 (define (primeNumbers limit)
-  (map (isP (i) countingNumbers(limit)))
+  (if (> limit 2)
+    (if (isP limit 2)
+      (append (primeNumbers (- limit 1)) (list limit))
+      (primeNumbers (- limit 1))
+    )
+    (list 2)
+  )
 )
 
-(define (isP l)
-  (do ((i 2 (+ i 1)))
-    ((<= (* i i ) (sqrt l)))
-      (if (= (mod l i) 0)
-        '()
-        l
-      )
+(define (isP num div)
+  (cond
+    ((= (mod num div) 0)
+      #f
+    )
+    ((> (* div div) num)
+      #t
+    )
+    (else 
+      (isP num (+ div 1))
+    )
   )
 )
 
@@ -49,15 +59,15 @@
 ; of the current list then recurse to the next set of list using the remaining parts
 (define (merge listOne listTwo)
   (cond
-    ((and (null? listOne) (null? listTwo))
-      '())
-    ((null? listOne)
+    ((< (length listOne) 1)
       listTwo)
-    ((null? listTwo)
+    ((< (length listTwo) 1)
       listOne)
-    (>= (car listOne) (car listTwo)
-      (append (list (car listOne)) (merge (cdr listOne) listTwo)))
-    (else (append (list (car listTwo) (merge listOne (cdr listTwo)))
+    ((< (car listOne) (car listTwo))
+      (append (list (car listOne)) (merge (cdr listOne) listTwo))
+    )
+    (else 
+      (append (list (car listTwo)) (merge listOne (cdr listTwo)))
     )
   )
 )
@@ -91,7 +101,4 @@
 (define (reduceLists func initialValue listOfLists)
   (map (lambda (i) (reduc func initialValue i)) listOfLists)
 )
-
-
-
 
